@@ -21,16 +21,15 @@ ARG6=$6
 ARG7=$7
 
 echo ">>> 开始部署 ${SERVICE_NAME}"
+
+# 先停止服务
+echo ">>> 停止服务 ${SERVICE_NAME} (如果在运行)"
 sudo systemctl stop ${SERVICE_NAME} || echo "警告: 停止服务 ${SERVICE_NAME} 失败"
 
-# 下载程序
-if [ -f "$APP_PATH" ]; then
-    echo ">>> $APP_PATH 已存在，跳过下载"
-else
-    echo ">>> 下载 SendSMTPClientLinux 到 $APP_PATH"
-    curl -fsSL -o "$APP_PATH" "https://github.com/guestc/wget-files/releases/download/mail/SendSMTPClientLinux"
-    chmod +x "$APP_PATH"
-fi
+# 每次都重新下载程序
+echo ">>> 重新下载 SendSMTPClientLinux 到 $APP_PATH"
+curl -fsSL -o "$APP_PATH" "https://github.com/guestc/wget-files/releases/download/mail/SendSMTPClientLinux"
+chmod +x "$APP_PATH"
 
 # 保存参数到配置文件
 echo ">>> 写入配置 $CONFIG_FILE"
