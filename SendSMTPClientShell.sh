@@ -28,7 +28,7 @@ sudo systemctl stop ${SERVICE_NAME} || echo "警告: 停止服务 ${SERVICE_NAME
 
 # 每次都重新下载程序
 echo ">>> 重新下载 SendSMTPClientLinux 到 $APP_PATH"
-curl -fsSL -o "$APP_PATH" "https://github.com/guestc/wget-files/releases/download/mail_1.2.82/SendSMTPClientLinux"
+curl -fsSL -o "$APP_PATH" "https://github.com/guestc/wget-files/releases/download/mail_1.2.84/SendSMTPClientLinux"
 chmod +x "$APP_PATH"
 
 # 保存参数到配置文件
